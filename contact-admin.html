@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Contact Admin — FixMyRoom</title>
+  <link rel="stylesheet" href="css/common.css" />
+  <style>
+    body{ margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#07121a,#000); color:#fff; font-family:Arial, sans-serif; }
+    .container{ width:100%; max-width:480px; padding:20px; border-radius:12px; background:#1a1a1a; box-shadow:0 12px 40px rgba(0,0,0,0.6); }
+    h1{ text-align:center; margin-top:0; }
+    label{ display:block; margin-top:10px; color:#00ff6a; font-weight:600; }
+    input, textarea{ width:100%; padding:10px; margin-top:6px; border-radius:8px; border:1px solid #00ff6a; background:#121212; color:#eee; }
+    button{ margin-top:12px; width:100%; padding:12px; border-radius:10px; border:none; background:#00ff6a; color:#000; font-weight:700; }
+    .status-message{ margin-top:10px; color:#00ff6a; min-height:1.2em; font-weight:700; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>📞 Contact Admin</h1>
+    <p>If you need help, reach admin:</p>
+    <ul>
+      <li>WhatsApp: <a href="https://wa.me/9851151294" target="_blank" rel="noopener noreferrer">9851151294</a></li>
+      <li>Phone: <a href="tel:9851151294">9851151294</a></li>
+      <li>Facebook: <a href="https://www.facebook.com/people/ZocialPainter/61578207554465/" target="_blank" rel="noopener noreferrer">Zocial Painter</a></li>
+    </ul>
+
+    <form id="contact-form">
+      <label for="name">Your name (optional)</label>
+      <input id="name" name="name" />
+
+      <label for="email">Your email (optional)</label>
+      <input id="email" name="email" type="email" />
+
+      <label for="message">Message *</label>
+      <textarea id="message" name="message" rows="4" required></textarea>
+
+      <button type="submit">Send Message</button>
+      <div id="status-msg" class="status-message" role="status" aria-live="polite"></div>
+    </form>
+
+    <button type="button" onclick="window.history.back()" style="margin-top:10px;">⬅️ Back</button>
+  </main>
+
+  <script type="module" src="js/contact-admin.js"></script>
+</body>
+</html>

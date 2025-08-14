@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FixMyRoom - Profile Setup</title>
+  <link rel="stylesheet" href="css/common.css" />
+  <style>
+    .profile-container {
+      max-width: 500px;
+      margin: 3rem auto;
+      background: #1f1f1f;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px #ff572288;
+    }
+    label {
+      font-weight: 600;
+      margin-top: 1rem;
+      display: block;
+    }
+    input, select, textarea {
+      margin-top: 0.3rem;
+    }
+    #save-btn {
+      margin-top: 1.5rem;
+      width: 100%;
+    }
+    #profile-pic-preview {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 1rem auto;
+      background-color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <h1>Complete Your Profile</h1>
+    <img id="profile-pic-preview" src="assets/images/avatar-placeholder.png" alt="Profile Picture" />
+    <input type="file" id="profile-pic-input" accept="image/*" />
+    <form id="profile-form">
+      <label for="displayName">Full Name</label>
+      <input type="text" id="displayName" required />
+
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" required />
+
+      <label for="address">Address</label>
+      <textarea id="address" rows="3" required></textarea>
+
+      <label for="workType" id="workType-label" style="display:none;">Work Type (For Workers)</label>
+      <select id="workType" style="display:none;">
+        <option value="" disabled selected>Select Work Type</option>
+        <option value="Painter">Painter</option>
+        <option value="Plumber">Plumber</option>
+        <option value="Electrician">Electrician</option>
+        <option value="Carpenter">Carpenter</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <button type="submit" id="save-btn">Save Profile</button>
+    </form>
+  </div>
+
+  <script type="module">
+    import { auth, firestore } from './js/firebase-config.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+    import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+
+    let selectedFile = null;
+    const profilePicInput = document.getElementById('profile-pic-input');
+    const profilePicPreview = document.getElementById('profile-pic-preview');
+
+    profilePicInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          profilePicPreview.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+      const userDoc = doc(firestore, 'users', user.uid);
+      const snap = await getDoc(userDoc);
+      if (!snap.exists()) {
+        alert('User data not found. Please relogin.');
+        auth.signOut();
+        return;
+      }
+      const data = snap.data();
+      if (!data.role) {
+        window.location.href = 'role.html';
+        return;
+      }
+      if (data.profileComplete) {
+        window.location.href = `${data.role}-dashboard.html`;
+        return;
+      }
+      document.getElementById('displayName').value = data.displayName || '';
+      document.getElementById('phone').value = data.phone || '';
+      document.getElementById('address').value = data.address || '';
+
+      if (data.role === 'worker') {
+        document.getElementById('workType-label').style.display = 'block';
+        document.getElementById('workType').style.display = 'block';
+        document.getElementById('workType').value = data.workType || '';
+      }
+    });
+
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const displayName = document.getElementById('displayName').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const address = document.getElementById('address').value.trim();
+      const workTypeSelect = document.getElementById('workType');
+      const workType = workTypeSelect ? workTypeSelect.value : null;
+
+      if (!displayName || !phone || !address) {
+        alert('Please fill all required fields.');
+        return;
+      }
+
+      const user = auth.currentUser;
+      if (!user) {
+        alert('Please login first.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      try {
+        // We don't use Firebase Storage so store profile pic as base64 in Firestore (small images only recommended)
+        let profilePicBase64 = null;
+        if (selectedFile) {
+          profilePicBase64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject('Error reading image');
+            reader.readAsDataURL(selectedFile);
+          });
+        }
+
+        await setDoc(
+          doc(firestore, 'users', user.uid),
+          {
+            displayName,
+            phone,
+            address,
+            workType: workType || null,
+            profileComplete: true,
+            profilePicBase64: profilePicBase64 || null,
+          },
+          { merge: true }
+        );
+
+        window.location.href = `${(await getDoc(doc(firestore, 'users', user.uid))).data().role}-dashboard.html`;
+      } catch (error) {
+        alert('Error saving profile: ' + error.message);
+      }
+    });
+  </script>
+</body>
+</html>

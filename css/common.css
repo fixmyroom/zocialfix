@@ -1,0 +1,152 @@
+/* common.css - Zomato inspired theme with red-orange dark background */
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #2e2e2e;
+  color: #fff;
+}
+
+a {
+  color: #ff5722;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  transition: background-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #ff5722;
+  color: white;
+  cursor: pointer;
+  padding: 0.7rem 1.2rem;
+  font-weight: 600;
+  border: none;
+}
+button:hover {
+  background-color: #e64a19;
+}
+
+input, select, textarea {
+  background-color: #444;
+  color: #fff;
+  border: 1px solid #666;
+  padding: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 6px;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #bbb;
+}
+
+header, footer {
+  background-color: #1f1f1f;
+  padding: 1rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.3rem;
+  box-shadow: 0 2px 5px rgba(255, 87, 34, 0.3);
+  color: white;
+}
+
+.container {
+  max-width: 900px;
+  margin: 1rem auto;
+  padding: 0 1rem;
+}
+
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+ul li {
+  background-color: #3a3a3a;
+  margin-bottom: 0.5rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.small {
+  font-size: 0.85rem;
+  color: #ccc;
+}
+
+.btn-toggle {
+  background-color: #ff7043;
+  color: white;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+.btn-toggle.premium-on {
+  background-color: #ffd54f;
+  color: #000;
+}
+
+.btn-toggle:hover {
+  background-color: #e64a19;
+}
+
+.btn-delete {
+  background-color: #d32f2f;
+  color: white;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+.btn-delete:hover {
+  background-color: #b71c1c;
+}
+
+.map-container {
+  width: 100%;
+  height: 400px;
+  border-radius: 12px;
+  margin-top: 1rem;
+  box-shadow: 0 0 15px #ff572288;
+}
+
+input[type="file"] {
+  background-color: #444;
+  padding: 0.5rem;
+  border-radius: 6px;
+  color: #fff;
+  border: 1px solid #666;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+label {
+  font-weight: 600;
+  margin-top: 1rem;
+  display: block;
+  color: #fff;
+}
+
+footer small {
+  color: #888;
+}

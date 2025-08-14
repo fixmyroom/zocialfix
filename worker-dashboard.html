@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FixMyRoom - Worker Dashboard</title>
+  <link rel="stylesheet" href="css/common.css" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+  />
+  <style>
+    body, html {
+      margin: 0;
+      height: 100%;
+      background: #2e2e2e;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background-color: #e84118;
+      padding: 1rem;
+      color: white;
+      font-weight: 700;
+      font-size: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px #d84315;
+      flex-shrink: 0;
+    }
+    #logout-btn {
+      background: #b71c1c;
+      border: none;
+      padding: 0.4rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+    #logout-btn:hover {
+      background: #7f0000;
+    }
+    main {
+      display: flex;
+      flex: 1 1 auto;
+      overflow: hidden;
+      height: calc(100vh - 70px);
+    }
+    #sidebar {
+      width: 320px;
+      background: #1f1f1f;
+      padding: 1rem;
+      box-shadow: inset -3px 0 15px #ff5722aa;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    #job-requests {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    #job-requests li {
+      background: #3a3a3a;
+      margin-bottom: 0.6rem;
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #job-requests li button {
+      background-color: #ff7043;
+      border: none;
+      padding: 0.4rem 0.7rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #222;
+      transition: background-color 0.3s ease;
+    }
+    #job-requests li button:hover {
+      background-color: #d45113;
+    }
+    #map {
+      flex-grow: 1;
+      height: 100%;
+    }
+    footer {
+      text-align: center;
+      padding: 0.5rem;
+      background: #1f1f1f;
+      font-size: 0.9rem;
+      color: #bbb;
+      box-shadow: 0 -2px 6px #ff5722aa;
+      flex-shrink: 0;
+    }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 600px) {
+      main {
+        flex-direction: column;
+        height: auto;
+      }
+
+      #sidebar {
+        width: 100%;
+        height: 250px;
+        box-shadow: inset 0 -3px 15px #ff5722aa;
+        padding: 0.5rem;
+        overflow-x: auto;
+        overflow-y: auto;
+      }
+
+      #job-requests {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      #job-requests li {
+        flex-direction: column;
+        align-items: flex-start;
+        font-size: 1.1rem;
+      }
+
+      #job-requests li button {
+        margin-top: 0.5rem;
+        width: 100%;
+        font-size: 1.1rem;
+        padding: 0.6rem 0;
+        border-radius: 8px;
+      }
+
+      #map {
+        flex-grow: 1;
+        height: 400px;
+      }
+
+      header, footer {
+        font-size: 1.2rem;
+        padding: 0.8rem 1rem;
+      }
+
+      #logout-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>👷 Worker Dashboard</div>
+    <button id="logout-btn">Logout</button>
+  </header>
+  <main>
+    <aside id="sidebar" aria-label="Available jobs">
+      <h2>Available Jobs</h2>
+      <ul id="job-requests" role="list">
+        <li>Loading jobs...</li>
+      </ul>
+    </aside>
+    <section id="map" aria-label="Job locations map"></section>
+  </main>
+  <footer>FixMyRoom &copy; 2025</footer>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""
+  ></script>
+  <script type="module" src="js/worker-dashboard.js"></script>
+</body>
+</html>

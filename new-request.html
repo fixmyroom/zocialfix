@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>FixMyRoom — New Job Request</title>
+  <link rel="stylesheet" href="css/common.css" />
+  <style>
+    body {
+      margin:0;
+      background:linear-gradient(180deg,#07121a,#000);
+      color:#fff;
+      font-family:Inter, sans-serif;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+    }
+    .card {
+      width:100%;
+      max-width:480px;
+      padding:22px;
+      border-radius:12px;
+      background:#121a25;
+      box-shadow:0 12px 40px rgba(0,0,0,0.6);
+    }
+    h1 {
+      margin-top:0;
+      color:#f1c40f;
+    }
+    label {
+      display:block;
+      margin-top:10px;
+      color:#00ff6a;
+      font-weight:600;
+    }
+    select, textarea {
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:none;
+      background:#0b121a;
+      color:#fff;
+      margin-top:6px;
+    }
+    button {
+      margin-top:16px;
+      padding:12px;
+      width:100%;
+      background:#e74c3c;
+      border:none;
+      border-radius:12px;
+      font-weight:700;
+      color:#fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background:#c0392b;
+    }
+    #msg {
+      margin-top:10px;
+      color:#9aa6b2;
+      min-height:1.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>➕ New Job Request</h1>
+    <label for="type">Job Type</label>
+    <select id="type" required>
+      <option value="" disabled selected>Select job type</option>
+      <option value="Plumbing">Plumbing</option>
+      <option value="Electrical">Electrical</option>
+      <option value="Painting">Painting</option>
+      <option value="Carpentry">Carpentry</option>
+      <option value="Cleaning">Cleaning</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <label for="details">Details / Description</label>
+    <textarea id="details" rows="4" placeholder="Describe the issue..." required></textarea>
+
+    <button id="submitBtn">Submit Request</button>
+    <div id="msg"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAB5KK4gMMwCAzmxjzTRAd0gK-gzpzbzmw",
+      authDomain: "fixmyroomwithzocial.firebaseapp.com",
+      projectId: "fixmyroomwithzocial",
+      storageBucket: "fixmyroomwithzocial.appspot.com",
+      messagingSenderId: "594671909340",
+      appId: "1:594671909340:web:9a9feedefed205a50ef719"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const firestore = getFirestore(app);
+
+    let currentUser = null;
+    let currentLoc = null;
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+      currentUser = user;
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            currentLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          },
+          () => {
+            // Could add error message if desired
+          }
+        );
+      }
+    });
+
+    document.getElementById('submitBtn').addEventListener('click', async () => {
+      const type = document.getElementById('type').value;
+      const details = document.getElementById('details').value.trim();
+      const msg = document.getElementById('msg');
+      msg.textContent = '';
+
+      if (!currentUser) {
+        msg.textContent = 'You must be signed in';
+        return;
+      }
+      if (!type || !details) {
+        msg.textContent = 'Please fill all fields';
+        return;
+      }
+      if (!currentLoc) {
+        msg.textContent = 'Location not available. Enable GPS and try again.';
+        return;
+      }
+
+      const jobData = {
+        customerId: currentUser.uid,
+        customerName: currentUser.displayName || '',
+        customerPhone: currentUser.phoneNumber || '',
+        jobType: type,
+        description: details,
+        location: {
+          lat: currentLoc.lat,
+          lng: currentLoc.lng
+        },
+        status: 'Pending',
+        assignedWorkerId: null,
+        createdAt: serverTimestamp(),
+        expiresAt: Date.now() + 8 * 60 * 60 * 1000 // 8 hours from now (ms)
+      };
+
+      try {
+        await addDoc(collection(firestore, 'jobRequests'), jobData);
+        msg.style.color = '#0f0';
+        msg.textContent = 'Request submitted successfully! Redirecting...';
+        setTimeout(() => {
+          window.location.href = 'customer-dashboard.html';
+        }, 1200);
+      } catch (err) {
+        msg.style.color = '#f33';
+        msg.textContent = 'Error: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>

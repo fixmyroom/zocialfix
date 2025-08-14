@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>FixMyRoom — Sign up</title>
+  <link rel="stylesheet" href="css/common.css" />
+  <style>
+    body{ margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#021B2D,#000); font-family: "Segoe UI", Arial, sans-serif; color:#fff; }
+    .card{ width:100%; max-width:460px; background:rgba(255,255,255,0.02); padding:22px; border-radius:12px; box-shadow:0 8px 40px rgba(0,0,0,0.6); }
+    h2{ margin:0 0 10px; color:#f1c40f; }
+    input, select{ width:100%; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); margin-bottom:10px; background:#071122; color:#fff; }
+    button{ width:100%; padding:12px; border-radius:10px; border:none; background:#E74C3C; color:#fff; font-weight:700; cursor:pointer; }
+    #msg{ margin-top:10px; color:#9aa6b2; min-height:1.2em; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Create an account</h2>
+    <input id="displayName" placeholder="Full name" autocomplete="name" />
+    <input id="email" type="email" placeholder="Email" autocomplete="email" />
+    <input id="password" type="password" placeholder="Password (min 6 chars)" autocomplete="new-password" />
+    <select id="role" aria-label="Select role">
+      <option value="customer">Customer</option>
+      <option value="worker">Worker</option>
+      <option value="store">Store</option>
+    </select>
+    <button id="btnCreate">Create account</button>
+    <div id="msg"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAB5KK4gMMwCAzmxjzTRAd0gK-gzpzbzmw",
+      authDomain: "fixmyroomwithzocial.firebaseapp.com",
+      databaseURL: "https://fixmyroomwithzocial-default-rtdb.firebaseio.com",
+      projectId: "fixmyroomwithzocial",
+      storageBucket: "fixmyroomwithzocial.appspot.com",
+      messagingSenderId: "594671909340",
+      appId: "1:594671909340:web:9a9feedefed205a50ef719"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const nameEl = document.getElementById('displayName');
+    const emailEl = document.getElementById('email');
+    const pwdEl = document.getElementById('password');
+    const roleEl = document.getElementById('role');
+    const msg = document.getElementById('msg');
+
+    function validateEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+    document.getElementById('btnCreate').addEventListener('click', async () => {
+      msg.textContent = '';
+      const displayName = nameEl.value.trim();
+      const email = emailEl.value.trim();
+      const password = pwdEl.value;
+      const role = roleEl.value;
+      if (!displayName) { msg.textContent = 'Please enter full name.'; return; }
+      if (!email || !validateEmail(email)) { msg.textContent = 'Enter a valid email.'; return; }
+      if (!password || password.length < 6) { msg.textContent = 'Password must be at least 6 characters.'; return; }
+      msg.textContent = 'Creating account...';
+      try {
+        const res = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, 'users', res.user.uid), {
+          uid: res.user.uid,
+          displayName,
+          email,
+          role,
+          premium: false,
+          createdAt: serverTimestamp()
+        });
+        msg.textContent = 'Account created — redirecting...';
+        setTimeout(() => window.location.href = 'role.html', 900);
+      } catch (err) {
+        msg.textContent = 'Failed: ' + (err.message || err.code);
+      }
+    });
+  </script>
+</body>
+</html>

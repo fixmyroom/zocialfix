@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FixMyRoom - Customer Dashboard</title>
+  <link rel="stylesheet" href="css/common.css" />
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #2e2e2e;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    header {
+      background-color: #e84118;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: white;
+      box-shadow: 0 2px 6px #d84315;
+      flex-shrink: 0;
+    }
+    #logout-btn {
+      background: #b71c1c;
+      border: none;
+      padding: 0.4rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+    #logout-btn:hover,
+    #logout-btn:focus {
+      background: #7f0000;
+      outline: none;
+    }
+    main {
+      display: flex;
+      flex: 1 1 auto;
+      overflow: hidden;
+      height: calc(100vh - 70px);
+    }
+    #sidebar {
+      width: 320px;
+      background: #1f1f1f;
+      padding: 1rem;
+      overflow-y: auto;
+      box-shadow: inset -3px 0 15px #ff5722aa;
+      display: flex;
+      flex-direction: column;
+      -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+    }
+    #sidebar h2 {
+      margin-top: 0;
+      margin-bottom: 0.8rem;
+      border-bottom: 1px solid #ff5722;
+      padding-bottom: 0.5rem;
+    }
+    #job-list {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 1rem;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    #job-list li {
+      background: #3a3a3a;
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      margin-bottom: 0.6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      word-break: break-word;
+    }
+    #map {
+      flex-grow: 1;
+      height: 100%;
+      min-width: 0; /* Prevent overflow in flex */
+    }
+    form {
+      margin-top: auto;
+    }
+    form label {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-weight: 600;
+    }
+    form select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: none;
+      background: #444;
+      color: white;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      -webkit-appearance: none; /* Better consistent styling */
+      -moz-appearance: none;
+      appearance: none;
+    }
+    form button {
+      width: 100%;
+      background: #ff5722;
+      border: none;
+      padding: 0.8rem;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+    form button:hover,
+    form button:focus {
+      background: #d84315;
+      outline: none;
+    }
+    a {
+      color: #ff5722;
+      text-decoration: none;
+    }
+    a:hover,
+    a:focus {
+      text-decoration: underline;
+      outline: none;
+    }
+
+    /* Responsive mobile-friendly tweaks */
+    @media (max-width: 768px) {
+      main {
+        flex-direction: column;
+        height: auto;
+      }
+      #sidebar {
+        width: 100%;
+        max-height: 40vh;
+        box-shadow: none;
+        padding: 0.5rem 1rem 1rem 1rem;
+      }
+      #job-list {
+        max-height: 100px;
+      }
+      #map {
+        height: 60vh;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header {
+        font-size: 1.2rem;
+        padding: 0.7rem 1rem;
+      }
+      #logout-btn {
+        padding: 0.3rem 0.8rem;
+        font-size: 0.9rem;
+      }
+      #sidebar {
+        max-height: 50vh;
+      }
+      #job-list {
+        max-height: 80px;
+      }
+      #map {
+        height: 50vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>👤 Customer Dashboard</div>
+    <button id="logout-btn" title="Logout" aria-label="Logout">Logout</button>
+  </header>
+  <main role="main" aria-label="Customer Dashboard main content">
+    <aside id="sidebar" role="complementary" aria-label="Sidebar with job requests">
+      <h2>Your Job Requests</h2>
+      <ul id="job-list" role="list" aria-live="polite" aria-relevant="all">
+        <!-- Jobs dynamically loaded here -->
+      </ul>
+
+      <h2>New Job Request</h2>
+      <form id="new-request-form" novalidate>
+        <label for="jobType">Select Job Type</label>
+        <select id="jobType" required aria-required="true" aria-label="Select job type" aria-describedby="jobTypeHelp">
+          <option value="" selected disabled>Select job type</option>
+          <option value="Carpentry">Carpentry</option>
+          <option value="Electrical">Electrical</option>
+          <option value="Painting">Painting</option>
+          <option value="Plumbing">Plumbing</option>
+          <option value="Other">Other</option>
+        </select>
+        <div id="jobTypeHelp" style="display:none;">Choose the type of job you want to request</div>
+        <button type="submit">Request Job</button>
+      </form>
+    </aside>
+    <section id="map" role="region" aria-label="Map showing workers and job locations"></section>
+  </main>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="module" src="js/customer-dashboard.js"></script>
+</body>
+</html>

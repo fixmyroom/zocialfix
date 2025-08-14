@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#000000" />
+<title>FixMyRoom — Login</title>
+<link rel="manifest" href="manifest.json" />
+<style>
+  body {
+    background-color: #000000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 2rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .logo {
+    max-width: 120px;
+    margin-bottom: 1rem;
+  }
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    max-width: 320px;
+    padding: 0.6rem 1rem;
+    margin: 0.5rem 0;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background-color: #222;
+    color: #fff;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+  input::placeholder {
+    color: #bbb;
+  }
+  button#loginBtn {
+    width: 100%;
+    max-width: 320px;
+    background-color: #E74C3C; /* red */
+    color: #fff;
+    font-weight: 600;
+    padding: 0.7rem;
+    border: none;
+    border-radius: 6px;
+    margin: 0.8rem 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button#loginBtn:hover,
+  button#loginBtn:focus {
+    background-color: #c0392b;
+    outline: none;
+  }
+  button.google-btn {
+    width: 100%;
+    max-width: 320px;
+    background-color: #F1C40F; /* yellow */
+    color: #222;
+    font-weight: 600;
+    padding: 0.7rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button.google-btn:hover,
+  button.google-btn:focus {
+    background-color: #d4ac0d;
+    outline: none;
+  }
+  .link {
+    margin-top: 1rem;
+    color: #fff;
+    font-size: 0.9rem;
+  }
+  .link a {
+    color: #2ECC71; /* green */
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .link a:hover,
+  .link a:focus {
+    text-decoration: underline;
+    outline: none;
+  }
+</style>
+</head>
+<body>
+
+<img class="logo" src="img/icon-192.png" alt="FixMyRoom Logo" />
+<h1>Login</h1>
+
+<input type="email" id="email" placeholder="Email" autocomplete="email" required aria-label="Email address" />
+<input type="password" id="password" placeholder="Password" autocomplete="current-password" required aria-label="Password" />
+<button id="loginBtn" aria-label="Login with email and password">Login</button>
+<button id="googleLogin" class="google-btn" aria-label="Sign in with Google">Sign in with Google</button>
+
+<div class="link">No account? <a href="signup.html">Sign up</a></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    GoogleAuthProvider,
+    signInWithPopup,
+    onAuthStateChanged,
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    serverTimestamp,
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAB5KK4gMMwCAzmxjzTRAd0gK-gzpzbzmw",
+    authDomain: "fixmyroomwithzocial.firebaseapp.com",
+    projectId: "fixmyroomwithzocial",
+    storageBucket: "fixmyroomwithzocial.appspot.com",
+    messagingSenderId: "594671909340",
+    appId: "1:594671909340:web:9a9feedefed205a50ef719",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const role = await getUserRole(user.uid);
+      redirectByRole(role);
+    }
+  });
+
+  document.getElementById("loginBtn").addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!email || !password) {
+      alert("Please fill all fields");
+      return;
+    }
+    if (!validateEmail(email)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+    if (password.length < 6) {
+      alert("Password should be at least 6 characters");
+      return;
+    }
+
+    try {
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
+      await ensureUserDoc(userCred.user);
+      const role = await getUserRole(userCred.user.uid);
+      redirectByRole(role);
+    } catch (err) {
+      alert("Login failed: " + err.message);
+    }
+  });
+
+  document.getElementById("googleLogin").addEventListener("click", async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      await ensureUserDoc(result.user);
+      const role = await getUserRole(result.user.uid);
+      redirectByRole(role);
+    } catch (err) {
+      alert("Google sign-in failed: " + err.message);
+    }
+  });
+
+  async function ensureUserDoc(user) {
+    const userRef = doc(db, "users", user.uid);
+    const snap = await getDoc(userRef);
+    if (!snap.exists()) {
+      await setDoc(userRef, {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || "",
+        phone: "",
+        role: "customer",
+        available: true,
+        premium: false,
+        createdAt: serverTimestamp(),
+      });
+    }
+  }
+
+  async function getUserRole(uid) {
+    try {
+      const userRef = doc(db, "users", uid);
+      const snap = await getDoc(userRef);
+      if (snap.exists()) {
+        return snap.data().role || "customer";
+      }
+      return "customer";
+    } catch {
+      return "customer";
+    }
+  }
+
+  function redirectByRole(role) {
+    switch (role) {
+      case "worker":
+        window.location.href = "worker-dashboard.html";
+        break;
+      case "store":
+        window.location.href = "store-dashboard.html";
+        break;
+      case "admin":
+        window.location.href = "admin-dashboard.html";
+        break;
+      default:
+        window.location.href = "customer-dashboard.html";
+    }
+  }
+
+  function validateEmail(email) {
+    // Simple regex for basic email validation
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+</script>
+</body>
+</html>

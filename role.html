@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FixMyRoom - Select Role</title>
+  <link rel="stylesheet" href="css/common.css" />
+  <style>
+    .role-container {
+      max-width: 400px;
+      margin: 4rem auto;
+      background: #1f1f1f;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px #ff572288;
+      text-align: center;
+    }
+    select {
+      font-size: 1.2rem;
+      padding: 0.8rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="role-container">
+    <h1>Select Your Role</h1>
+    <form id="role-form">
+      <select id="role" required>
+        <option value="" disabled selected>Select your role</option>
+        <option value="customer">Customer</option>
+        <option value="worker">Worker</option>
+        <option value="store">Store</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button type="submit" style="margin-top:1.5rem;">Continue</button>
+    </form>
+  </div>
+
+  <script type="module">
+    import { auth, firestore } from './js/firebase-config.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+      try {
+        const snap = await getDoc(doc(firestore, 'users', user.uid));
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.role && data.profileComplete) {
+            window.location.href = `${data.role}-dashboard.html`;
+          } else if (data.role && !data.profileComplete) {
+            window.location.href = 'profile.html';
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    });
+
+    document.getElementById('role-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const role = document.getElementById('role').value;
+      const user = auth.currentUser;
+      if (!user) {
+        alert('Sign in first');
+        return;
+      }
+      try {
+        await setDoc(doc(firestore, 'users', user.uid), { role, profileComplete: false }, { merge: true });
+        window.location.href = 'profile.html';
+      } catch (err) {
+        alert('Error saving role: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
