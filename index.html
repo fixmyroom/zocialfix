@@ -14,6 +14,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
     }
     .auth-container {
       max-width: 400px;
@@ -84,7 +85,14 @@
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, onAuthStateChanged, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      signInWithPopup,
+      onAuthStateChanged,
+      GoogleAuthProvider
+    } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
     import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
 
     // Firebase config
@@ -163,7 +171,9 @@
       } catch (err) { showError(err.message); }
     });
 
-    onAuthStateChanged(auth, (user) => { if (user) window.location.href = 'role.html'; });
+    onAuthStateChanged(auth, (user) => {
+      if (user) window.location.href = 'role.html';
+    });
   </script>
 </body>
 </html>
