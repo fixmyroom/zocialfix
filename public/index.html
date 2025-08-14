@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FixMyRoom - Login / Signup</title>
-  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="./css/common.css" />
   <style>
     body {
       background-color: #2e2e2e;
@@ -66,15 +66,17 @@
 </head>
 <body>
   <div class="auth-container">
-    <img src="assets/images/logo.png" alt="FixMyRoom Logo" class="logo" />
+    <img src="./assets/images/logo.png" alt="FixMyRoom Logo" class="logo" />
     <h1>🔑 Welcome to FixMyRoom</h1>
     <div id="error-msg"></div>
 
-    <input type="email" id="email" placeholder="Email address" autocomplete="email" />
-    <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
-
-    <button id="login-btn">🚪 Login</button>
-    <button id="signup-btn">📝 Sign Up</button>
+    <!-- Wrapped inputs and buttons in form -->
+    <form id="login-form">
+      <input type="email" id="email" placeholder="Email address" autocomplete="email" />
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+      <button type="button" id="login-btn">🚪 Login</button>
+      <button type="button" id="signup-btn">📝 Sign Up</button>
+    </form>
 
     <div class="google-btn" id="google-signin-btn" title="Sign in with Google">
       <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" alt="Google logo" width="20" height="20" />
@@ -83,13 +85,10 @@
   </div>
 
   <script type="module">
-    // Import Firebase modules from CDN (modular version)
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, onAuthStateChanged, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
     import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
-    import { getDatabase } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js';
 
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAB5KK4gMMwCAzmxjzTRAd0gK-gzpzbzmw",
       authDomain: "fixmyroomwithzocial.firebaseapp.com",
@@ -100,14 +99,11 @@
       appId: "1:594671909340:web:9a9feedefed205a50ef719"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
     const firestore = getFirestore(app);
-    const rtdb = getDatabase(app);
+    const provider = new GoogleAuthProvider();
 
-    // DOM elements
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const errorMsg = document.getElementById('error-msg');
@@ -118,7 +114,6 @@
     function showError(message) { errorMsg.textContent = '❌ ' + message; }
     function clearError() { errorMsg.textContent = ''; }
 
-    // Email/password login
     loginBtn.addEventListener('click', async () => {
       clearError();
       const email = emailInput.value.trim();
@@ -130,7 +125,6 @@
       } catch (err) { showError(err.message); }
     });
 
-    // Email/password signup
     signupBtn.addEventListener('click', async () => {
       clearError();
       const email = emailInput.value.trim();
@@ -150,7 +144,6 @@
       } catch (err) { showError(err.message); }
     });
 
-    // Google login
     googleBtn.addEventListener('click', async () => {
       clearError();
       try {
@@ -171,7 +164,6 @@
       } catch (err) { showError(err.message); }
     });
 
-    // Auto redirect if user already logged in
     onAuthStateChanged(auth, (user) => { if (user) window.location.href = 'role.html'; });
   </script>
 </body>
