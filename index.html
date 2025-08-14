@@ -24,10 +24,7 @@
       box-shadow: 0 0 15px #ff572288;
       text-align: center;
     }
-    img.logo {
-      height: 100px;
-      margin-bottom: 1rem;
-    }
+    img.logo { height: 100px; margin-bottom: 1rem; }
     input, button {
       font-size: 1rem;
       border-radius: 6px;
@@ -38,37 +35,13 @@
       box-sizing: border-box;
       font-weight: 600;
     }
-    input {
-      background-color: #444;
-      color: #fff;
-      border: 1px solid #666;
-    }
-    input::placeholder {
-      color: #bbb;
-    }
-    #error-msg {
-      color: #ff7043;
-      margin-bottom: 1rem;
-      min-height: 1.5em;
-    }
-    button#login-btn {
-      background-color: #ff5722;
-      color: white;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    button#login-btn:hover {
-      background-color: #e64a19;
-    }
-    button#signup-btn {
-      background-color: #ff7043;
-      color: #222;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    button#signup-btn:hover {
-      background-color: #d45113;
-    }
+    input { background-color: #444; color: #fff; border: 1px solid #666; }
+    input::placeholder { color: #bbb; }
+    #error-msg { color: #ff7043; margin-bottom: 1rem; min-height: 1.5em; }
+    button#login-btn { background-color: #ff5722; color: white; cursor: pointer; transition: 0.3s; }
+    button#login-btn:hover { background-color: #e64a19; }
+    button#signup-btn { background-color: #ff7043; color: #222; cursor: pointer; transition: 0.3s; }
+    button#signup-btn:hover { background-color: #d45113; }
     .google-btn {
       background-color: #4caf50;
       color: white;
@@ -95,7 +68,6 @@
   <div class="auth-container">
     <img src="assets/images/logo.png" alt="FixMyRoom Logo" class="logo" />
     <h1>🔑 Welcome to FixMyRoom</h1>
-
     <div id="error-msg"></div>
 
     <input type="email" id="email" placeholder="Email address" autocomplete="email" />
@@ -105,25 +77,31 @@
     <button id="signup-btn">📝 Sign Up</button>
 
     <div class="google-btn" id="google-signin-btn" title="Sign in with Google">
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png"
-        alt="Google logo"
-        width="20"
-        height="20"
-      />
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" alt="Google logo" width="20" height="20" />
       Sign in with Google
     </div>
   </div>
 
   <script type="module">
-    import { auth, firestore, provider } from './js/firebase-config.js';
-    import {
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword,
-      signInWithPopup,
-      onAuthStateChanged
-    } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
-    import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, onAuthStateChanged, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+    import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAB5KK4gMMwCAzmxjzTRAd0gK-gzpzbzmw",
+      authDomain: "fixmyroomwithzocial.firebaseapp.com",
+      databaseURL: "https://fixmyroomwithzocial-default-rtdb.firebaseio.com",
+      projectId: "fixmyroomwithzocial",
+      storageBucket: "fixmyroomwithzocial.firebasestorage.app",
+      messagingSenderId: "594671909340",
+      appId: "1:594671909340:web:9a9feedefed205a50ef719"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const firestore = getFirestore(app);
+    const provider = new GoogleAuthProvider();
 
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
@@ -132,35 +110,25 @@
     const signupBtn = document.getElementById('signup-btn');
     const googleBtn = document.getElementById('google-signin-btn');
 
-    function showError(message) {
-      errorMsg.textContent = '❌ ' + message;
-    }
-    function clearError() {
-      errorMsg.textContent = '';
-    }
+    function showError(message) { errorMsg.textContent = '❌ ' + message; }
+    function clearError() { errorMsg.textContent = ''; }
 
     loginBtn.addEventListener('click', async () => {
       clearError();
       const email = emailInput.value.trim();
       const password = passwordInput.value.trim();
-      if (!email || !password) {
-        return showError('Please enter email and password.');
-      }
+      if (!email || !password) return showError('Please enter email and password.');
       try {
         await signInWithEmailAndPassword(auth, email, password);
         window.location.href = 'role.html';
-      } catch (error) {
-        showError(error.message);
-      }
+      } catch (err) { showError(err.message); }
     });
 
     signupBtn.addEventListener('click', async () => {
       clearError();
       const email = emailInput.value.trim();
       const password = passwordInput.value.trim();
-      if (!email || !password) {
-        return showError('Please enter email and password.');
-      }
+      if (!email || !password) return showError('Please enter email and password.');
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await setDoc(doc(firestore, 'users', userCredential.user.uid), {
@@ -172,9 +140,7 @@
           createdAt: new Date().toISOString()
         });
         window.location.href = 'role.html';
-      } catch (error) {
-        showError(error.message);
-      }
+      } catch (err) { showError(err.message); }
     });
 
     googleBtn.addEventListener('click', async () => {
@@ -194,16 +160,10 @@
           });
         }
         window.location.href = 'role.html';
-      } catch (error) {
-        showError(error.message);
-      }
+      } catch (err) { showError(err.message); }
     });
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.location.href = 'role.html';
-      }
-    });
+    onAuthStateChanged(auth, (user) => { if (user) window.location.href = 'role.html'; });
   </script>
 </body>
 </html>
