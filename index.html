@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FixMyRoom - Login / Signup</title>
   <link rel="stylesheet" href="css/common.css" />
+  <link rel="icon" href="assets/favicon.ico" type="image/x-icon" />
   <style>
     body {
       background-color: #2e2e2e;
@@ -84,7 +85,6 @@
   </div>
 
   <script type="module">
-    // Modular Firebase v9+ imports
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
     import {
       getAuth,
@@ -96,7 +96,6 @@
     } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
     import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
 
-    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyAB5KK4gMMwCAzmxjzTRAd0gK-gzpzbzmw",
       authDomain: "fixmyroomwithzocial.firebaseapp.com",
@@ -107,13 +106,11 @@
       appId: "1:594671909340:web:9a9feedefed205a50ef719"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const firestore = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
-    // DOM elements
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const errorMsg = document.getElementById('error-msg');
@@ -121,11 +118,9 @@
     const signupBtn = document.getElementById('signup-btn');
     const googleBtn = document.getElementById('google-signin-btn');
 
-    // Utility functions
     function showError(message) { errorMsg.textContent = '❌ ' + message; }
     function clearError() { errorMsg.textContent = ''; }
 
-    // Login with email/password
     loginBtn.addEventListener('click', async () => {
       clearError();
       const email = emailInput.value.trim();
@@ -137,7 +132,6 @@
       } catch (err) { showError(err.message); }
     });
 
-    // Signup with email/password
     signupBtn.addEventListener('click', async () => {
       clearError();
       const email = emailInput.value.trim();
@@ -157,7 +151,6 @@
       } catch (err) { showError(err.message); }
     });
 
-    // Google Sign-In
     googleBtn.addEventListener('click', async () => {
       clearError();
       try {
@@ -178,8 +171,9 @@
       } catch (err) { showError(err.message); }
     });
 
-    // Auto-redirect if already logged in
-    onAuthStateChanged(auth, (user) => { if (user) window.location.href = 'role.html'; });
+    onAuthStateChanged(auth, (user) => {
+      if (user) window.location.href = 'role.html';
+    });
   </script>
 </body>
 </html>
