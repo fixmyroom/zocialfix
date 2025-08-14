@@ -1,89 +1,178 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FixMyRoom - Login / Signup</title>
+  <link rel="stylesheet" href="css/common.css" />
+  <style>
+    body {
+      background-color: #2e2e2e;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .auth-container {
+      max-width: 400px;
+      width: 100%;
+      padding: 2rem;
+      background: #1f1f1f;
+      border-radius: 12px;
+      box-shadow: 0 0 15px #ff572288;
+      text-align: center;
+    }
+    img.logo { height: 100px; margin-bottom: 1rem; }
+    input, button {
+      font-size: 1rem;
+      border-radius: 6px;
+      border: none;
+      padding: 0.6rem 1rem;
+      margin: 0.4rem 0;
+      width: 100%;
+      box-sizing: border-box;
+      font-weight: 600;
+    }
+    input { background-color: #444; color: #fff; border: 1px solid #666; }
+    input::placeholder { color: #bbb; }
+    #error-msg { color: #ff7043; margin-bottom: 1rem; min-height: 1.5em; }
+    button#login-btn { background-color: #ff5722; color: white; cursor: pointer; transition: 0.3s; }
+    button#login-btn:hover { background-color: #e64a19; }
+    button#signup-btn { background-color: #ff7043; color: #222; cursor: pointer; transition: 0.3s; }
+    button#signup-btn:hover { background-color: #d45113; }
+    .google-btn {
+      background-color: #4caf50;
+      color: white;
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 0.6rem;
+      user-select: none;
+      font-weight: 600;
+      box-shadow: 0 0 10px #4caf5088;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .google-btn:hover {
+      background-color: #388e3c;
+      box-shadow: 0 0 15px #388e3c88;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <img src="assets/images/logo.png" alt="FixMyRoom Logo" class="logo" />
+    <h1>🔑 Welcome to FixMyRoom</h1>
+    <div id="error-msg"></div>
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/12.1.0/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/12.1.0/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/12.1.0/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/12.1.0/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/12.1.0/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/12.1.0/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/12.1.0/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/12.1.0/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/12.1.0/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/12.1.0/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+    <input type="email" id="email" placeholder="Email address" autocomplete="email" />
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
+    <button id="login-btn">🚪 Login</button>
+    <button id="signup-btn">📝 Sign Up</button>
+
+    <div class="google-btn" id="google-signin-btn" title="Sign in with Google">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" alt="Google logo" width="20" height="20" />
+      Sign in with Google
     </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+  </div>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+  <script type="module">
+    // Import Firebase modules from CDN (modular version)
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, onAuthStateChanged, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+    import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+    import { getDatabase } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js';
 
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAB5KK4gMMwCAzmxjzTRAd0gK-gzpzbzmw",
+      authDomain: "fixmyroomwithzocial.firebaseapp.com",
+      databaseURL: "https://fixmyroomwithzocial-default-rtdb.firebaseio.com",
+      projectId: "fixmyroomwithzocial",
+      storageBucket: "fixmyroomwithzocial.firebasestorage.app",
+      messagingSenderId: "594671909340",
+      appId: "1:594671909340:web:9a9feedefed205a50ef719"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    const firestore = getFirestore(app);
+    const rtdb = getDatabase(app);
+
+    // DOM elements
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const errorMsg = document.getElementById('error-msg');
+    const loginBtn = document.getElementById('login-btn');
+    const signupBtn = document.getElementById('signup-btn');
+    const googleBtn = document.getElementById('google-signin-btn');
+
+    function showError(message) { errorMsg.textContent = '❌ ' + message; }
+    function clearError() { errorMsg.textContent = ''; }
+
+    // Email/password login
+    loginBtn.addEventListener('click', async () => {
+      clearError();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      if (!email || !password) return showError('Please enter email and password.');
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = 'role.html';
+      } catch (err) { showError(err.message); }
+    });
+
+    // Email/password signup
+    signupBtn.addEventListener('click', async () => {
+      clearError();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      if (!email || !password) return showError('Please enter email and password.');
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(firestore, 'users', userCredential.user.uid), {
+          email: email,
+          role: null,
+          displayName: null,
+          premium: false,
+          profileComplete: false,
+          createdAt: new Date().toISOString()
+        });
+        window.location.href = 'role.html';
+      } catch (err) { showError(err.message); }
+    });
+
+    // Google login
+    googleBtn.addEventListener('click', async () => {
+      clearError();
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        const userDoc = await getDoc(doc(firestore, 'users', user.uid));
+        if (!userDoc.exists()) {
+          await setDoc(doc(firestore, 'users', user.uid), {
+            email: user.email,
+            role: null,
+            displayName: user.displayName || null,
+            premium: false,
+            profileComplete: false,
+            createdAt: new Date().toISOString()
+          });
         }
-      });
-    </script>
-  </body>
+        window.location.href = 'role.html';
+      } catch (err) { showError(err.message); }
+    });
+
+    // Auto redirect if user already logged in
+    onAuthStateChanged(auth, (user) => { if (user) window.location.href = 'role.html'; });
+  </script>
+</body>
 </html>
