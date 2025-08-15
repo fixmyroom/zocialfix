@@ -37,45 +37,60 @@
       </select>
       <button type="submit" style="margin-top:1.5rem;">Continue</button>
     </form>
+    <p id="loader" style="display:none;">Loading...</p>
   </div>
 
   <script type="module">
-    // Import Firebase app and services
     import { auth, firestore } from './js/firebase-config.js';
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
     import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // Check user login and redirect
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return window.location.href = './index.html';
+    const loader = document.getElementById('loader');
+
+    // Wrap async work in a small async function
+    async function checkUserRole(user) {
+      loader.style.display = 'block';
       try {
-        const snap = await getDoc(doc(firestore, 'users', user.uid));
-        if (snap.exists()) {
-          const data = snap.data();
+        const userDoc = await getDoc(doc(firestore, 'users', user.uid));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
           if (data.role && data.profileComplete) {
-            window.location.href = `./${data.role}-dashboard.html`;
+            window.location.href = `${data.role}-dashboard.html`;
           } else if (data.role && !data.profileComplete) {
-            window.location.href = './profile.html';
+            window.location.href = 'profile.html';
           }
         }
-      } catch (e) {
-        console.error('Error fetching user data:', e);
+      } catch (err) {
+        console.error('Firestore read error:', err);
+      } finally {
+        loader.style.display = 'none';
       }
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+      checkUserRole(user); // async call without blocking main thread
     });
 
-    // Handle role selection form
     document.getElementById('role-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const role = document.getElementById('role').value;
       const user = auth.currentUser;
-      if (!user) return alert('Please sign in first.');
-
+      if (!user) {
+        alert('Sign in first');
+        return;
+      }
+      loader.style.display = 'block';
       try {
         await setDoc(doc(firestore, 'users', user.uid), { role, profileComplete: false }, { merge: true });
-        window.location.href = './profile.html';
+        window.location.href = 'profile.html';
       } catch (err) {
-        console.error('Error saving role:', err);
         alert('Error saving role: ' + err.message);
+      } finally {
+        loader.style.display = 'none';
       }
     });
   </script>
