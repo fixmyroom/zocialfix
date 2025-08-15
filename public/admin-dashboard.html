@@ -11,7 +11,6 @@
     crossorigin=""
   />
   <style>
-    /* Reset and base */
     body, html {
       margin: 0;
       padding: 0;
@@ -58,7 +57,7 @@
       display: flex;
       height: calc(100vh - 70px);
       overflow: hidden;
-      min-height: 0; /* fix flex overflow in some browsers */
+      min-height: 0;
     }
     #sidebar {
       width: 360px;
@@ -124,12 +123,9 @@
     #map {
       flex-grow: 1;
       height: 100%;
-      min-width: 0; /* prevent flexbox overflow issues */
-      /* Mobile friendly: full width on small screens */
+      min-width: 0;
       min-height: 200px;
     }
-
-    /* Responsive for smaller screens */
     @media (max-width: 800px) {
       main {
         flex-direction: column;
@@ -167,10 +163,7 @@
     <section id="map" role="region" aria-label="Map showing users and job locations"></section>
   </main>
 
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    crossorigin=""
-  ></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script type="module" src="js/admin-dashboard.js"></script>
 </body>
 </html>

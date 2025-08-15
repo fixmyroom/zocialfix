@@ -22,6 +22,12 @@
       margin-top: 1rem;
       width: 100%;
     }
+    #loader {
+      margin-top: 1rem;
+      display: none;
+      font-size: 1rem;
+      color: #ff5722;
+    }
   </style>
 </head>
 <body>
@@ -37,23 +43,32 @@
       </select>
       <button type="submit" style="margin-top:1.5rem;">Continue</button>
     </form>
-    <p id="loader" style="display:none;">Loading...</p>
+    <p id="loader">Checking role...</p>
   </div>
 
   <script type="module">
     import { auth, firestore } from './js/firebase-config.js';
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     const loader = document.getElementById('loader');
 
-    // Wrap async work in a small async function
-    async function checkUserRole(user) {
+    async function redirectUser(user) {
       loader.style.display = 'block';
       try {
-        const userDoc = await getDoc(doc(firestore, 'users', user.uid));
-        if (userDoc.exists()) {
-          const data = userDoc.data();
+        const snap = await getDoc(doc(firestore, 'users', user.uid));
+        if (snap.exists()) {
+          const data = snap.data();
+
+          // Ensure non-admins cannot access admin dashboard
+          if (data.role === 'admin' && !data.profileComplete) {
+            window.location.href = 'profile.html';
+            return;
+          }
+          if (data.role === 'admin' && data.profileComplete) {
+            window.location.href = 'admin-dashboard.html';
+            return;
+          }
           if (data.role && data.profileComplete) {
             window.location.href = `${data.role}-dashboard.html`;
           } else if (data.role && !data.profileComplete) {
@@ -72,7 +87,7 @@
         window.location.href = 'index.html';
         return;
       }
-      checkUserRole(user); // async call without blocking main thread
+      redirectUser(user);
     });
 
     document.getElementById('role-form').addEventListener('submit', async (e) => {
@@ -83,10 +98,17 @@
         alert('Sign in first');
         return;
       }
+
       loader.style.display = 'block';
       try {
         await setDoc(doc(firestore, 'users', user.uid), { role, profileComplete: false }, { merge: true });
-        window.location.href = 'profile.html';
+
+        // Redirect immediately after setting role
+        if (role === 'admin') {
+          window.location.href = 'admin-dashboard.html';
+        } else {
+          window.location.href = 'profile.html';
+        }
       } catch (err) {
         alert('Error saving role: ' + err.message);
       } finally {
