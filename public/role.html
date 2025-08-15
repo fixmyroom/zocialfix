@@ -52,6 +52,8 @@
     import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     const loader = document.getElementById('loader');
+    const roleSelect = document.getElementById('role');
+    const adminEmail = "pratikaryal1986@gmail.com";
 
     async function redirectUser(user) {
       loader.style.display = 'block';
@@ -60,15 +62,22 @@
         if (snap.exists()) {
           const data = snap.data();
 
-          // Ensure non-admins cannot access admin dashboard
-          if (data.role === 'admin' && !data.profileComplete) {
-            window.location.href = 'profile.html';
-            return;
-          }
-          if (data.role === 'admin' && data.profileComplete) {
+          // Only allow admin email to access admin dashboard
+          if (data.role === 'admin') {
+            if (user.email !== adminEmail) {
+              alert('You are not allowed to access admin dashboard!');
+              window.location.href = 'role.html';
+              return;
+            }
+            if (!data.profileComplete) {
+              window.location.href = 'profile.html';
+              return;
+            }
             window.location.href = 'admin-dashboard.html';
             return;
           }
+
+          // Normal role redirects
           if (data.role && data.profileComplete) {
             window.location.href = `${data.role}-dashboard.html`;
           } else if (data.role && !data.profileComplete) {
@@ -87,15 +96,28 @@
         window.location.href = 'index.html';
         return;
       }
+
+      // Hide admin from dropdown if user is not admin email
+      if (user.email !== adminEmail) {
+        const adminOption = roleSelect.querySelector('option[value="admin"]');
+        if (adminOption) adminOption.remove();
+      }
+
       redirectUser(user);
     });
 
     document.getElementById('role-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const role = document.getElementById('role').value;
+      const role = roleSelect.value;
       const user = auth.currentUser;
       if (!user) {
         alert('Sign in first');
+        return;
+      }
+
+      // Prevent non-admin emails from picking admin
+      if (role === 'admin' && user.email !== adminEmail) {
+        alert('You cannot select admin role!');
         return;
       }
 
@@ -103,7 +125,7 @@
       try {
         await setDoc(doc(firestore, 'users', user.uid), { role, profileComplete: false }, { merge: true });
 
-        // Redirect immediately after setting role
+        // Redirect based on role
         if (role === 'admin') {
           window.location.href = 'admin-dashboard.html';
         } else {

@@ -1,100 +1,75 @@
+// js/admin-dashboard.js
 import { auth, firestore, rtdb } from './firebase-config.js';
-import {
-  onAuthStateChanged,
-  signOut
-} from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
-import {
-  collection,
-  onSnapshot,
-  doc,
-  updateDoc,
-  getDoc,
-} from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
-import {
-  ref,
-  onValue,
-} from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js';
+import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+import { collection, onSnapshot, doc, updateDoc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+import { ref, onValue } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js';
 
 let map;
 const markers = new Map();
 
 function initMap() {
   map = L.map('map').setView([27.7, 85.3], 12);
-
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
   }).addTo(map);
 }
 
 function clearMarkers() {
-  markers.forEach((marker) => map.removeLayer(marker));
+  markers.forEach(marker => map.removeLayer(marker));
   markers.clear();
 }
 
 function addUserMarker(user) {
-  if (!user.location || !user.location.lat || !user.location.lng) return;
+  if (!user.location?.lat || !user.location?.lng) return;
   const id = user.uid;
   if (markers.has(id)) {
     markers.get(id).setLatLng([user.location.lat, user.location.lng]);
     return;
   }
-
   const color = user.role === 'worker' ? '#e74c3c' : '#f39c12';
   const icon = L.divIcon({
     className: 'custom-div-icon',
-    html: `<div style="font-size: 1.5rem; color: ${color}">${user.role === 'worker' ? '👷' : '👤'}</div>`,
+    html: `<div style="font-size:1.5rem; color:${color}">${user.role==='worker'?'👷':'👤'}</div>`,
   });
-
-  const phoneHtml =
-    user.phoneNumber && user.phoneNumber !== 'N/A'
-      ? `<a href="tel:${user.phoneNumber}" style="color:#0af; word-break: break-word;">${user.phoneNumber}</a>`
-      : 'No phone number';
-
+  const phoneHtml = user.phoneNumber && user.phoneNumber!=='N/A'
+    ? `<a href="tel:${user.phoneNumber}" style="color:#0af;">${user.phoneNumber}</a>`
+    : 'No phone number';
   const marker = L.marker([user.location.lat, user.location.lng], { icon })
     .addTo(map)
-    .bindPopup(`
-      <b>${user.displayName || 'Unknown'}</b><br/>
-      Role: ${user.role}<br/>
-      Email: ${user.email || 'N/A'}<br/>
-      Premium: ${user.premium ? 'Yes' : 'No'}<br/>
-      Phone: ${phoneHtml}
-    `);
-
+    .bindPopup(`<b>${user.displayName || 'Unknown'}</b><br/>
+                Role: ${user.role}<br/>
+                Email: ${user.email || 'N/A'}<br/>
+                Premium: ${user.premium ? 'Yes' : 'No'}<br/>
+                Phone: ${phoneHtml}`);
   markers.set(id, marker);
 }
 
 function addJobMarker(job) {
-  if (!job.location || !job.location.lat || !job.location.lng) return;
+  if (!job.location?.lat || !job.location?.lng) return;
   const id = job.id;
   if (markers.has(id)) {
     markers.get(id).setLatLng([job.location.lat, job.location.lng]);
     return;
   }
-
   const icon = L.divIcon({
     className: 'custom-div-icon',
-    html: `<div style="font-size: 1.5rem; color: #f39c12;">🛠️ ${job.jobType}</div>`,
+    html: `<div style="font-size:1.5rem; color:#f39c12;">🛠️ ${job.jobType}</div>`,
   });
-
   const phoneHtml = job.assignedWorkerPhone
-    ? `<a href="tel:${job.assignedWorkerPhone}" style="color:#ff5722; word-break: break-word;">${job.assignedWorkerPhone}</a>`
+    ? `<a href="tel:${job.assignedWorkerPhone}" style="color:#ff5722;">${job.assignedWorkerPhone}</a>`
     : 'No phone number';
-
   const marker = L.marker([job.location.lat, job.location.lng], { icon })
     .addTo(map)
-    .bindPopup(`
-      <b>Job Request</b><br/>
-      Type: ${job.jobType}<br/>
-      Status: ${job.status || 'Pending'}<br/>
-      Customer ID: ${job.customerId}<br/>
-      Assigned Worker: ${job.assignedWorkerName || 'None'}<br/>
-      Phone: ${phoneHtml}
-    `);
-
+    .bindPopup(`<b>Job Request</b><br/>
+                Type: ${job.jobType}<br/>
+                Status: ${job.status || 'Pending'}<br/>
+                Customer ID: ${job.customerId}<br/>
+                Assigned Worker: ${job.assignedWorkerName || 'None'}<br/>
+                Phone: ${phoneHtml}`);
   markers.set(id, marker);
 }
 
-// Check admin role
+// --- Secure admin check ---
 async function checkAdmin(user) {
   try {
     const snap = await getDoc(doc(firestore, 'users', user.uid));
@@ -105,7 +80,7 @@ async function checkAdmin(user) {
     const data = snap.data();
     if (data.role !== 'admin') {
       alert('Access denied. Admins only.');
-      window.location.href = `${data.role}-dashboard.html`;
+      window.location.href = `${data.role || 'role' }-dashboard.html`;
       return false;
     }
     return true;
@@ -125,6 +100,7 @@ onAuthStateChanged(auth, async (user) => {
   const isAdmin = await checkAdmin(user);
   if (!isAdmin) return;
 
+  document.getElementById('admin-content').style.display = 'flex';
   initMap();
 
   const userListEl = document.getElementById('user-list');
@@ -133,70 +109,47 @@ onAuthStateChanged(auth, async (user) => {
   if (userListEl) userListEl.innerHTML = '<li>Loading users...</li>';
   if (jobListEl) jobListEl.innerHTML = '<li>Loading jobs...</li>';
 
-  const EXPIRY_MS = 60 * 60 * 1000;
+  const EXPIRY_MS = 60*60*1000;
   const jobStatusCache = new Map();
 
-  // Users listener
-  const usersCol = collection(firestore, 'users');
-  onSnapshot(usersCol, (snapshot) => {
+  // --- Users ---
+  onSnapshot(collection(firestore, 'users'), (snapshot) => {
     if (!userListEl) return;
     userListEl.innerHTML = '';
-    snapshot.docs.forEach((docSnap) => {
+    snapshot.docs.forEach(docSnap => {
       const userData = docSnap.data();
       userData.uid = docSnap.id;
-
-      const phone = userData.phoneNumber || userData.phone || null;
-      const phoneDisplay = phone ? phone : 'No phone number';
-
       const li = document.createElement('li');
-      li.style.marginBottom = '1rem';
-      li.style.wordBreak = 'break-word';
-      li.innerHTML = `
-        <strong>${userData.displayName || 'Unknown'}</strong> (${userData.role || 'No Role'})<br/>
-        <small>Phone: ${phoneDisplay}</small>
-      `;
-
+      li.innerHTML = `<strong>${userData.displayName || 'Unknown'}</strong> (${userData.role || 'No Role'})<br/>
+                      <small>Phone: ${userData.phoneNumber || userData.phone || 'No phone number'}</small>`;
       const premiumBtn = document.createElement('button');
       premiumBtn.textContent = userData.premium ? 'Revoke Premium' : 'Make Premium';
-      premiumBtn.style.marginTop = '5px';
-      premiumBtn.onclick = async () => {
-        try {
-          await updateDoc(doc(firestore, 'users', userData.uid), {
-            premium: !userData.premium,
-          });
-        } catch (err) {
-          alert('Error updating premium status: ' + err.message);
-        }
-      };
+      premiumBtn.onclick = async () => await updateDoc(doc(firestore, 'users', userData.uid), { premium: !userData.premium });
       li.appendChild(premiumBtn);
       userListEl.appendChild(li);
     });
   });
 
-  // Jobs listener
-  const jobsCol = collection(firestore, 'jobRequests');
-  onSnapshot(jobsCol, async (snapshot) => {
+  // --- Jobs ---
+  onSnapshot(collection(firestore, 'jobRequests'), async (snapshot) => {
     if (!jobListEl) return;
     jobListEl.innerHTML = '';
-
     if (snapshot.empty) {
       jobListEl.innerHTML = '<li>No job requests found.</li>';
       return;
     }
-
     const now = Date.now();
-
     for (const docSnap of snapshot.docs) {
       const job = docSnap.data();
       job.id = docSnap.id;
 
       const prevStatus = jobStatusCache.get(job.id);
-      if (job.status === 'Confirmed' && prevStatus !== 'Confirmed') {
+      if (job.status==='Confirmed' && prevStatus!=='Confirmed') {
         alert(`Job "${job.jobType}" (ID: ${job.id}) has been accepted by worker.`);
       }
       jobStatusCache.set(job.id, job.status);
 
-      if (job.status === 'Completed' && job.createdAt && now - job.createdAt.toMillis() > EXPIRY_MS) continue;
+      if (job.status==='Completed' && job.createdAt && now - job.createdAt.toMillis() > EXPIRY_MS) continue;
 
       if (job.assignedWorkerId) {
         try {
@@ -215,40 +168,18 @@ onAuthStateChanged(auth, async (user) => {
       addJobMarker(job);
 
       const li = document.createElement('li');
-      li.style.marginBottom = '1rem';
-      li.style.wordBreak = 'break-word';
-      li.innerHTML = `
-        <strong>${job.jobType}</strong> — Status: ${job.status || 'Pending'}<br/>
-        Assigned to: ${job.assignedWorkerName || 'None'}<br/>
-        Phone: ${
-          job.assignedWorkerPhone
-            ? `<a href="tel:${job.assignedWorkerPhone}" style="color:#ff5722;">${job.assignedWorkerPhone}</a>`
-            : 'No phone number'
-        }
-      `;
+      li.innerHTML = `<strong>${job.jobType}</strong> — Status: ${job.status || 'Pending'}<br/>
+                      Assigned to: ${job.assignedWorkerName || 'None'}<br/>
+                      Phone: ${job.assignedWorkerPhone ? `<a href="tel:${job.assignedWorkerPhone}" style="color:#ff5722;">${job.assignedWorkerPhone}</a>` : 'No phone number'}`;
 
-      if (job.status === 'Pending') {
+      if (job.status==='Pending') {
         const approveBtn = document.createElement('button');
         approveBtn.textContent = 'Approve';
-        approveBtn.onclick = async () => {
-          try {
-            await updateDoc(doc(firestore, 'jobRequests', job.id), { status: 'Confirmed' });
-            alert('Job approved');
-          } catch (err) {
-            alert('Error approving job: ' + err.message);
-          }
-        };
+        approveBtn.onclick = async () => await updateDoc(doc(firestore, 'jobRequests', job.id), { status:'Confirmed' });
 
         const rejectBtn = document.createElement('button');
         rejectBtn.textContent = 'Reject';
-        rejectBtn.onclick = async () => {
-          try {
-            await updateDoc(doc(firestore, 'jobRequests', job.id), { status: 'Rejected' });
-            alert('Job rejected');
-          } catch (err) {
-            alert('Error rejecting job: ' + err.message);
-          }
-        };
+        rejectBtn.onclick = async () => await updateDoc(doc(firestore, 'jobRequests', job.id), { status:'Rejected' });
 
         li.appendChild(approveBtn);
         li.appendChild(rejectBtn);
@@ -258,10 +189,10 @@ onAuthStateChanged(auth, async (user) => {
     }
   });
 
-  // RTDB workers
+  // --- Realtime DB workers ---
   const workersRef = ref(rtdb, 'workers');
   let rtdbTimeout = null;
-  onValue(workersRef, async (snapshot) => {
+  onValue(workersRef, snapshot => {
     if (rtdbTimeout) clearTimeout(rtdbTimeout);
     rtdbTimeout = setTimeout(async () => {
       clearMarkers();
@@ -272,7 +203,6 @@ onAuthStateChanged(auth, async (user) => {
           const userDoc = await getDoc(doc(firestore, 'users', uid));
           if (!userDoc.exists()) continue;
           const userData = userDoc.data();
-
           addUserMarker({
             uid,
             location: loc,
@@ -289,8 +219,8 @@ onAuthStateChanged(auth, async (user) => {
     }, 300);
   });
 
-  // Logout
-  document.getElementById('logout-btn').addEventListener('click', async () => {
+  // --- Logout ---
+  document.getElementById('logout-btn')?.addEventListener('click', async () => {
     await signOut(auth);
     window.location.href = 'index.html';
   });

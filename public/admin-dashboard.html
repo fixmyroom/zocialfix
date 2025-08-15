@@ -58,6 +58,7 @@
       height: calc(100vh - 70px);
       overflow: hidden;
       min-height: 0;
+      display: none; /* hide until admin verified */
     }
     #sidebar {
       width: 360px;
@@ -152,7 +153,7 @@
     <div>🛠️ Admin Dashboard</div>
     <button id="logout-btn" aria-label="Logout">Logout</button>
   </header>
-  <main>
+  <main id="admin-content">
     <aside id="sidebar" role="complementary" aria-label="Sidebar with user and job lists">
       <div class="section-label">Users</div>
       <ul id="user-list" aria-live="polite" aria-relevant="all"><li>Loading users...</li></ul>
