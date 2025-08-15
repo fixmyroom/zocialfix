@@ -1,64 +1,28 @@
-// js/firebase.js
-// Modular Firebase helper for the app.
-// Replace config values if needed; these are from your project context.
+// public/js/firebase-config.js
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged as _onAuthStateChanged,
-  signOut as _signOut
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+// Import Firebase modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
-import {
-  getFirestore,
-  collection,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  onSnapshot,
-  addDoc,
-  serverTimestamp,
-  query,
-  where,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-// --- Firebase config (your project) ---
+// Your Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyC7D-JCIAJdsecrluDKEFKr7XBeOb3RkO4",
+  apiKey: "AIzaSyAB5KK4gMMwCAzmxjzTRAd0gK-gzpzbzmw",
   authDomain: "fixmyroomwithzocial.firebaseapp.com",
-  projectId: "fixmyroom-7a518",
-  storageBucket: "fixmyroom-7a518.appspot.com",
-  messagingSenderId: "128618384581",
-  appId: "1:128618384581:web:2560232e41345b39d974ac"
+  databaseURL: "https://fixmyroomwithzocial-default-rtdb.firebaseio.com",
+  projectId: "fixmyroomwithzocial",
+  storageBucket: "fixmyroomwithzocial.firebasestorage.app",
+  messagingSenderId: "594671909340",
+  appId: "1:594671909340:web:9a9feedefed205a50ef719"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+const firestore = getFirestore(app);
+const rtdb = getDatabase(app);
 
-// Re-export small wrappers for convenience
-const onAuthStateChanged = _onAuthStateChanged;
-const signOut = _signOut;
-
-export {
-  app,
-  auth,
-  db,
-  onAuthStateChanged,
-  signOut,
-
-  // Firestore helpers
-  collection,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  onSnapshot,
-  addDoc,
-  serverTimestamp,
-  query,
-  where,
-  getDocs
-};
+// Export modules for use in other JS files
+export { auth, provider, firestore, rtdb };
